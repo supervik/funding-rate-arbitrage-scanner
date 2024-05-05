@@ -5,7 +5,8 @@ This project is designed for analyzing funding rates and identifying potential P
 
 ## Introduction
 
-This project fetches funding rate data from configured cryptocurrency exchanges and analyzes it to identify potential trading opportunities. You can use any exchange from the CCXT library. For a list of supported exchange IDs, refer to: https://docs.ccxt.com/#/?id=exchanges
+This project fetches funding rate data from configured cryptocurrency exchanges and analyzes it to identify potential trading opportunities. You can use any exchange from the CCXT library. For a list of supported exchange IDs, refer to:
+https://docs.ccxt.com/#/?id=exchanges
 
 It provides functionality to fetch and save:
 - Current funding rate data
@@ -17,11 +18,11 @@ It provides functionality to fetch and save:
 
 Clone the repository:
 ```bash
-git clone https://github.com/yourusername/yourproject.git
+git clone https://github.com/supervik/funding-rate-arbitrage-scanner.git
 ```
 Navigate to the project directory:
  ```bash
- cd yourproject
+ cd funding-rate-arbitrage-scanner
  ```
 Install dependencies:
  ```bash

@@ -138,8 +138,8 @@ def create_perp_perp_opportunities_df(exchange_1, exchange_2, df_1, df_2):
     df['rate_diff'] = df['short_rate'] - df['long_rate']
 
     # Identify historical rates for short and long exchanges
-    df['historical_rates_x'] = df['historical_rates_x'].apply(ast.literal_eval)
-    df['historical_rates_y'] = df['historical_rates_y'].apply(ast.literal_eval)
+    df['historical_rates_x'] = df['historical_rates_x'].fillna('[]').apply(ast.literal_eval)
+    df['historical_rates_y'] = df['historical_rates_y'].fillna('[]').apply(ast.literal_eval)
 
     df['short_historical_rates'] = df.apply(
         lambda x: x['historical_rates_x'] if x['short_exchange'] == exchange_1
@@ -183,7 +183,7 @@ def create_spot_perp_opportunites_df(perpetual_exchange, perpetual_rates_df, spo
     perpetual_rates_df = perpetual_rates_df[perpetual_rates_df['rate'].abs() > CONFIG['funding_rate_threshold']]
     spot_perp_df = pd.merge(perpetual_rates_df, spot_pairs_df, on='spot_pair', how='inner')
     spot_perp_df['perp_exchange'] = perpetual_exchange
-    spot_perp_df['historical_rates'] = spot_perp_df['historical_rates'].apply(ast.literal_eval)
+    spot_perp_df['historical_rates'] = spot_perp_df['historical_rates'].fillna('[]').apply(ast.literal_eval)
     days = CONFIG['funding_historical_days']
     spot_perp_df[f'{days}_days_average_daily_rate'] = spot_perp_df['historical_rates'].apply(sum) / days
 

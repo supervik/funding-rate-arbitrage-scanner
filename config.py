@@ -1,16 +1,15 @@
 CONFIG = {
-    'perpetual_exchanges': ['htx', 'gate', 'binance', 'kucoinfutures', 'bybit', 'okx'],
-    # 'perpetual_exchanges': [],
+    'perpetual_exchanges': ['binance', 'gate', 'kucoinfutures', 'okx'],
     # List of perpetual exchanges from which to obtain or analyze funding rates.
     # Specify exchange IDs according to the CCXT library format.
     # For a list of supported exchange IDs, refer to: https://docs.ccxt.com/#/?id=exchanges
 
-    'spot_exchanges': ['htx', 'gate', 'binance', 'kucoin', 'bybit', 'okx'],
+    'spot_exchanges': ['binance', 'gate', 'kucoin', 'okx'],
     # List of spot exchanges for analyzing opportunities between Spot and Perpetual.
     # Specify exchange IDs according to the CCXT library format.
     # For a list of supported exchange IDs, refer to: https://docs.ccxt.com/#/?id=exchanges
 
-    'fetch_and_save_data': True,
+    'fetch_and_save_data': False,
     # Whether the script should fetch funding rates from exchanges and save them to files
     # You can fetch the data first and then change this option to False and analyze the data
 

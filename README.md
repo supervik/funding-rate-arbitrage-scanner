@@ -51,7 +51,7 @@ For Perpetual-Perpetual opportunities, the analysis generates a file named `resu
 
 - **pair**: The trading pair involved in the opportunity
 - **rate_diff**: The current difference in funding rates between the short and long exchanges
-- **N_days_average_daily_rate_diff**: The average daily rate difference over the past N days. The number of days configured by the `funding_historical_days` parameter
+- **APY_historical_average**: The average APY calculated from historical rates over the past N days. The number of days configured by the `funding_historical_days` parameter
 - **short_exchange**: The exchange with the higher funding rate where you are supposed to open a Short order
 - **long_exchange**: The exchange with the lower funding rate where you are supposed to open a Long order
 - **mean_daily_amplitude**: The average daily amplitude of the trading pair. Amplitude is the percentage difference between the daily high and low prices. Higher amplitudes indicate greater asset volatility. The number of days for calculation is configured by the `amplitude_days` parameter
@@ -60,13 +60,13 @@ For Perpetual-Perpetual opportunities, the analysis generates a file named `resu
 - **long_rate**: The current funding rate of the long exchange
 - **short_cumulative_rate**: The cumulative funding rate of the short exchange
 - **long_cumulative_rate**: The cumulative funding rate of the long exchange
-- **short_historical_rates**: List of historical funding rates of the short exchange
-- **long_historical_rates**: List of historical funding rates of the long exchange
+- **short_historical_rates**: List of historical funding rates of the short exchange. The number of days configured by the `funding_historical_days` parameter
+- **long_historical_rates**: List of historical funding rates of the long exchange. The number of days configured by the `funding_historical_days` parameter
 
 For Perpetual-Spot arbitrage opportunities, the analysis generates two files named `result_spot_perp_positive_*` and `result_spot_perp_negative_*` for positive and negative funding rates, respectively, with the following columns:
 - **pair**: The trading pair involved in the opportunity
 - **rate**: The current funding rate on the perpetual exchange
-- **N_days_average_daily_rate**: The average daily rate over the past N days. The number of days configured by the `funding_historical_days` parameter
+- **APY_historical_average**: The average APY calculated from historical rates over the past N days. The number of days configured by the `funding_historical_days` parameter
 - **perp_exchange**: The perpetual exchange where you are supposed to open a Short order if the rate is positive and Long order if the rate is negative
 - **spot_exchange**: Spot exchanges where you can hedge the opportunity: open a Buy order if the rate is positive and Sell if the rate is negative
 - **mean_daily_amplitude**: The average daily amplitude of the trading pair. Amplitude is the percentage difference between the daily high and low prices. Higher amplitudes indicate greater asset volatility. The number of days for calculation is configured by the `amplitude_days` parameter

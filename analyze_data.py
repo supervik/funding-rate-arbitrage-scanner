@@ -44,8 +44,6 @@ def analyze_data():
             final_df = final_df[final_df['rate_diff'] > CONFIG['funding_rate_threshold']]
             final_df = final_df.sort_values(by='rate_diff', ascending=False, ignore_index=True)
 
-            # print("Final Perpetual-Perpetual opportunities dataframe:")
-            # print(final_df)
             df_to_file(final_df, directory_result, f"result_perp_perp_{perpetual_exchanges_str}")
             print(f"-- Analysis process finished. The data is saved in the directory: {directory_result}")
 
@@ -61,8 +59,8 @@ def analyze_data():
         for perpetual_exchange, perpetual_rates_df in perpetual_data_df.items():
             df = create_spot_perp_opportunites_df(perpetual_exchange, perpetual_rates_df, spot_pairs_df)
             final_df = pd.concat([final_df, df], ignore_index=True)
-        positive_rates_df = filter_and_sort_rates(final_df, final_df['rate'] > 0, False, "positive")
-        negative_rates_df = filter_and_sort_rates(final_df, final_df['rate'] < 0, True, "negative")
+        positive_rates_df = filter_and_sort_rates(final_df, negative=False)
+        negative_rates_df = filter_and_sort_rates(final_df, negative=True)
 
         df_to_file(positive_rates_df, directory_result, f"result_spot_perp_positive_{perpetual_exchanges_str}")
         df_to_file(negative_rates_df, directory_result, f"result_spot_perp_negative_{perpetual_exchanges_str}")
@@ -154,26 +152,26 @@ def create_perp_perp_opportunities_df(exchange_1, exchange_2, df_1, df_2):
         lambda x: x['historical_rates_x'] if x['long_exchange'] == exchange_1
         else x['historical_rates_y'], axis=1)
 
-    # Calculate cumulative rates
+    # Calculate cumulative rates and average APY
     df['short_cumulative_rate'] = df['short_historical_rates'].apply(sum)
     df['long_cumulative_rate'] = df['long_historical_rates'].apply(sum)
 
     df['cumulative_rate_diff'] = df['short_cumulative_rate'] - df['long_cumulative_rate']
-    days = CONFIG['funding_historical_days']
-    df[f'{days}_days_average_daily_rate_diff'] = df['cumulative_rate_diff'] / days
+    df['APY_historical_average'] = 365 * df['cumulative_rate_diff'] / CONFIG['funding_historical_days']
 
+    # Identify amplitude as the maximum between two exchanges
     df['mean_daily_amplitude'] = df[['mean_daily_amplitude_x', 'mean_daily_amplitude_y']].max(axis=1)
     df['max_daily_amplitude'] = df[['max_daily_amplitude_x', 'max_daily_amplitude_y']].max(axis=1)
 
     return df[
-        ['pair', 'rate_diff', f'{days}_days_average_daily_rate_diff', 'short_exchange', 'long_exchange',
+        ['pair', 'rate_diff', f'APY_historical_average', 'short_exchange', 'long_exchange',
          'mean_daily_amplitude', 'max_daily_amplitude', 'short_rate', 'long_rate',
          'short_cumulative_rate', 'long_cumulative_rate', 'short_historical_rates', 'long_historical_rates']]
 
 
 def create_spot_perp_opportunites_df(perpetual_exchange, perpetual_rates_df, spot_pairs_df):
     """
-   Creates a dataframe of Spot-Perpetual trading opportunities.
+   Creates a dataframe of Spot-Perpetual trading opportunities by merging perpetual and spot dataframes
 
    Args:
        perpetual_exchange (str): Name of the perpetual exchange.
@@ -183,38 +181,50 @@ def create_spot_perp_opportunites_df(perpetual_exchange, perpetual_rates_df, spo
    Returns:
        pd.DataFrame: DataFrame containing Spot-Perpetual trading opportunities.
    """
+    # Rename pair column to spot_pair in spot data dataframe
     spot_pairs_df.rename(columns={'pair': 'spot_pair'}, inplace=True)
+
+    # Create spot_pair column out of perpetual pair by splitting the string with ':' and removing leading numbers
     perpetual_rates_df['spot_pair'] = perpetual_rates_df['pair'].str.split(':').str.get(0)
     perpetual_rates_df['spot_pair'] = perpetual_rates_df['spot_pair'].apply(remove_leading_numbers)
+
+    # Filter data below the threshold
     perpetual_rates_df = perpetual_rates_df[perpetual_rates_df['rate'].abs() > CONFIG['funding_rate_threshold']]
+
+    # Merge perpetual and spot dataframes
     spot_perp_df = pd.merge(perpetual_rates_df, spot_pairs_df, on='spot_pair', how='inner')
+
+    # Add the column with the perpetual exchange name
     spot_perp_df['perp_exchange'] = perpetual_exchange
+
+    # Format historical rates and calculate average APY out of them
     spot_perp_df['historical_rates'] = spot_perp_df['historical_rates'].fillna('[]').apply(ast.literal_eval)
-    days = CONFIG['funding_historical_days']
-    spot_perp_df[f'{days}_days_average_daily_rate'] = spot_perp_df['historical_rates'].apply(sum) / days
+    spot_perp_df['APY_historical_average'] = 365 * spot_perp_df['historical_rates'].apply(sum) / CONFIG['funding_historical_days']
 
     return spot_perp_df[
-        ['pair', 'rate', f'{days}_days_average_daily_rate', 'perp_exchange', 'spot_exchange',
+        ['pair', 'rate', 'APY_historical_average', 'perp_exchange', 'spot_exchange',
          'mean_daily_amplitude', 'max_daily_amplitude', 'historical_rates']]
 
 
-def filter_and_sort_rates(df, filter_condition, ascending_order, side):
+def filter_and_sort_rates(df, negative=False):
     """
     Filters and sorts DataFrame with Spot-Perpetual trading opportunities based on specified conditions.
 
     Args:
         df (pd.DataFrame): DataFrame containing Spot-Perpetual trading opportunities
-        filter_condition (bool): Condition to filter the DataFrame.
-        ascending_order (bool): Specifies whether to sort the DataFrame in ascending order.
-        side (str): Side of the trading rates to filter (e.g., "positive" or "negative").
+        negative (bool): Specifies whether to filter dataframes with positive or negative rates.
 
     Returns:
         pd.DataFrame: Filtered and sorted DataFrame.
     """
-    filtered_df = df[filter_condition]
-    sorted_df = filtered_df.sort_values(by='rate', ascending=ascending_order, ignore_index=True)
-    # print(f"\n Final Spot-Perpetual opportunities {side} rates dataframe:")
-    # print(sorted_df)
+    if negative:
+        df[f'APY_historical_average'] *= -1
+        filtered_df = df[df['rate'] < 0]
+        sorted_df = filtered_df.sort_values(by='rate', ascending=True, ignore_index=True)
+    else:
+        filtered_df = df[df['rate'] > 0]
+        sorted_df = filtered_df.sort_values(by='rate', ascending=False, ignore_index=True)
+
     return sorted_df
 
 

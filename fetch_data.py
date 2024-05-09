@@ -34,12 +34,12 @@ def fetch_and_save_data():
         hours = CONFIG['funding_historical_days'] * 24
         df_historical_rates = get_historical_funding_rates_for_pairs(exchange, perp_trading_pairs, hours=hours)
 
-        # Get daily volatility data
-        df_daily_volatility = get_daily_volatility(exchange, perp_trading_pairs, days=CONFIG['volatility_days'])
+        # Get daily amplitude data
+        df_daily_amplitude = get_daily_amplitude(exchange, perp_trading_pairs, days=CONFIG['amplitude_days'])
 
         # Merge and save data to file
         intersection_df = pd.merge(df_rates, df_historical_rates, on='pair', how='left')
-        intersection_df = pd.merge(intersection_df, df_daily_volatility, on='pair', how='left')
+        intersection_df = pd.merge(intersection_df, df_daily_amplitude, on='pair', how='left')
 
         df_to_file(intersection_df, directory_data, f"funding_rates_{exchange.id}")
 
@@ -106,7 +106,7 @@ def get_historical_funding_rates_for_pairs(exchange, trading_pairs, hours=24):
     return pd.DataFrame(data)
 
 
-def get_daily_volatility(exchange, trading_pairs, days):
+def get_daily_amplitude(exchange, trading_pairs, days):
     """
     Fetches daily candle data of specified trading pairs and calculate mean and max amplitude.
     Amplitude is defined as high - low of a daily candle in percentage
@@ -138,7 +138,7 @@ def get_daily_volatility(exchange, trading_pairs, days):
 
         data.append({'pair': pair, 'mean_daily_amplitude': mean_amplitude, 'max_daily_amplitude': max_amplitude})
 
-        display_progress(index, total_pairs, info="Getting daily volatility")
+        display_progress(index, total_pairs, info="Getting daily amplitudes")
     print("\r")
     return pd.DataFrame(data)
 

@@ -54,7 +54,7 @@ For Perpetual-Perpetual opportunities, the analysis generates a file named `resu
 - **N_days_average_daily_rate_diff**: The average daily rate difference over the past N days. The number of days configured by the `funding_historical_days` parameter
 - **short_exchange**: The exchange with the higher funding rate where you are supposed to open a Short order
 - **long_exchange**: The exchange with the lower funding rate where you are supposed to open a Long order
-- **mean_daily_amplitude**: The average daily amplitude of the trading pair. Amplitude is the percentage difference between the daily high and low prices. Higher amplitudes indicate greater asset volatility. The number of days for calculation is configured by the `volatility_days` parameter
+- **mean_daily_amplitude**: The average daily amplitude of the trading pair. Amplitude is the percentage difference between the daily high and low prices. Higher amplitudes indicate greater asset volatility. The number of days for calculation is configured by the `amplitude_days` parameter
 - **max_daily_amplitude**: The maximum daily amplitude of the trading pair
 - **short_rate**: The current funding rate of the short exchange
 - **long_rate**: The current funding rate of the long exchange
@@ -69,6 +69,6 @@ For Perpetual-Spot arbitrage opportunities, the analysis generates two files nam
 - **N_days_average_daily_rate**: The average daily rate over the past N days. The number of days configured by the `funding_historical_days` parameter
 - **perp_exchange**: The perpetual exchange where you are supposed to open a Short order if the rate is positive and Long order if the rate is negative
 - **spot_exchange**: Spot exchanges where you can hedge the opportunity: open a Buy order if the rate is positive and Sell if the rate is negative
-- **mean_daily_amplitude**: The average daily amplitude of the trading pair. Amplitude is the percentage difference between the daily high and low prices. Higher amplitudes indicate greater asset volatility. The number of days for calculation is configured by the `volatility_days` parameter
+- **mean_daily_amplitude**: The average daily amplitude of the trading pair. Amplitude is the percentage difference between the daily high and low prices. Higher amplitudes indicate greater asset volatility. The number of days for calculation is configured by the `amplitude_days` parameter
 - **max_daily_amplitude**: The maximum daily amplitude of the trading pair
 - **historical_rates**: List of historical funding rates. The number of days configured by the `funding_historical_days` parameter

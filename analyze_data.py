@@ -47,12 +47,15 @@ def analyze_data():
             # print("Final Perpetual-Perpetual opportunities dataframe:")
             # print(final_df)
             df_to_file(final_df, directory_result, f"result_perp_perp_{perpetual_exchanges_str}")
+            print(f"-- Analysis process finished. The data is saved in the directory: {directory_result}")
 
     # Analyze Spot-Perpetual opportunities
     if CONFIG['get_spot_perp_opportunities']:
         print(f"-- Analyzing Spot-Perpetual opportunities")
 
         spot_pairs_df = create_spot_data_df_from_files(directory_data)
+        if spot_pairs_df.empty:
+            return
 
         final_df = pd.DataFrame()
         for perpetual_exchange, perpetual_rates_df in perpetual_data_df.items():
@@ -63,8 +66,7 @@ def analyze_data():
 
         df_to_file(positive_rates_df, directory_result, f"result_spot_perp_positive_{perpetual_exchanges_str}")
         df_to_file(negative_rates_df, directory_result, f"result_spot_perp_negative_{perpetual_exchanges_str}")
-
-    print(f"- Analyzing process finished. The data is saved in the directory: {directory_result}\n")
+        print(f"-- Analysis process finished. The data is saved in the directory: {directory_result}")
 
 
 def create_perpetual_data_df_from_files(directory_data):
@@ -84,7 +86,7 @@ def create_perpetual_data_df_from_files(directory_data):
             df['pair'] = df['pair'].apply(remove_leading_numbers)
             perpetual_data[exchange] = df
     if len(perpetual_data) == 0:
-        print(f"Exiting: Perpetual exchange data not found.")
+        print(f"- Exiting: Perpetual exchange data not found.")
         return False
     print(f"Data for perpetual exchanges ({', '.join(perpetual_data.keys())}) loaded successfully")
 
@@ -104,8 +106,12 @@ def create_spot_data_df_from_files(directory_data):
     spot_data = []
     for exchange in CONFIG['spot_exchanges']:
         df = file_to_df(f"{directory_data}", f"spot_pairs_{exchange}")
-        df['spot_exchange'] = exchange
-        spot_data.append(df)
+        if not df.empty:
+            df['spot_exchange'] = exchange
+            spot_data.append(df)
+    if len(spot_data) == 0:
+        print("- Exiting: No spot data found")
+        return pd.DataFrame()
     combined_df = pd.concat(spot_data).groupby('pair')['spot_exchange'].apply('/'.join).reset_index()
     return combined_df
 

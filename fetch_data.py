@@ -35,7 +35,7 @@ def fetch_and_save_data():
         df_historical_rates = get_historical_funding_rates_for_pairs(exchange, perp_trading_pairs, hours=hours)
 
         # Get daily amplitude data
-        df_daily_amplitude = get_daily_amplitude(exchange, perp_trading_pairs, days=CONFIG['amplitude_days'])
+        df_daily_amplitude = get_daily_amplitude(exchange, perp_trading_pairs)
 
         # Merge and save data to file
         intersection_df = pd.merge(df_rates, df_historical_rates, on='pair', how='left')
@@ -106,7 +106,7 @@ def get_historical_funding_rates_for_pairs(exchange, trading_pairs, hours=24):
     return pd.DataFrame(data)
 
 
-def get_daily_amplitude(exchange, trading_pairs, days):
+def get_daily_amplitude(exchange, trading_pairs):
     """
     Fetches daily candle data of specified trading pairs and calculate mean and max amplitude.
     Amplitude is defined as high - low of a daily candle in percentage
@@ -114,11 +114,11 @@ def get_daily_amplitude(exchange, trading_pairs, days):
     Args:
         exchange (ccxt.Exchange): Exchange object.
         trading_pairs (list): List of trading pairs.
-        days (int): Number of days of ohlc data to fetch
 
     Returns:
         pd.DataFrame: DataFrame containing mean and max amplitude for each pair.
     """
+    days = CONFIG['amplitude_days']
     current_time = int(datetime.datetime.now().timestamp() * 1000)
     start_time = current_time - days * 24 * 60 * 60 * 1000
     total_pairs = len(trading_pairs)
@@ -133,10 +133,14 @@ def get_daily_amplitude(exchange, trading_pairs, days):
 
         df['amplitude'] = 100 * (df['high'] - df['low']) / df['open']
 
-        mean_amplitude = df['amplitude'].mean()
-        max_amplitude = df['amplitude'].max()
+        mean_amplitude = round(df['amplitude'].mean(), 2)
+        max_amplitude = round(df['amplitude'].max(), 2)
+        amplitude_days = len(df)
 
-        data.append({'pair': pair, 'mean_daily_amplitude': mean_amplitude, 'max_daily_amplitude': max_amplitude})
+        data.append({'pair': pair,
+                     'mean_daily_amplitude': mean_amplitude,
+                     'max_daily_amplitude': max_amplitude,
+                     'amplitude_days': amplitude_days})
 
         display_progress(index, total_pairs, info="Getting daily amplitudes")
     print("\r")

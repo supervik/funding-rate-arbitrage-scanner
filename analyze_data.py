@@ -158,14 +158,28 @@ def create_perp_perp_opportunities_df(exchange_1, exchange_2, df_1, df_2):
 
     df['cumulative_rate_diff'] = df['short_cumulative_rate'] - df['long_cumulative_rate']
     df['APY_historical_average'] = 365 * df['cumulative_rate_diff'] / CONFIG['funding_historical_days']
+    df['APY_historical_average'] = df['APY_historical_average'].round(decimals=2)
 
-    # Identify amplitude as the maximum between two exchanges
+    # Identify amplitude as the maximum between two exchanges or the values with more data available
+    # Assigning initial values
     df['mean_daily_amplitude'] = df[['mean_daily_amplitude_x', 'mean_daily_amplitude_y']].max(axis=1)
     df['max_daily_amplitude'] = df[['max_daily_amplitude_x', 'max_daily_amplitude_y']].max(axis=1)
+    df['amplitude_days'] = df['amplitude_days_x']
+
+    # Updating values based on conditions
+    condition_1 = df['amplitude_days_x'] > df['amplitude_days_y']
+    condition_2 = df['amplitude_days_y'] > df['amplitude_days_x']
+
+    df.loc[condition_1, 'mean_daily_amplitude'] = df['mean_daily_amplitude_x']
+    df.loc[condition_1, 'max_daily_amplitude'] = df['max_daily_amplitude_x']
+    df.loc[condition_1, 'amplitude_days'] = df['amplitude_days_x']
+    df.loc[condition_2, 'mean_daily_amplitude'] = df['mean_daily_amplitude_y']
+    df.loc[condition_2, 'max_daily_amplitude'] = df['max_daily_amplitude_y']
+    df.loc[condition_2, 'amplitude_days'] = df['amplitude_days_y']
 
     return df[
         ['pair', 'rate_diff', f'APY_historical_average', 'short_exchange', 'long_exchange',
-         'mean_daily_amplitude', 'max_daily_amplitude', 'short_rate', 'long_rate',
+         'mean_daily_amplitude', 'max_daily_amplitude', 'amplitude_days', 'short_rate', 'long_rate',
          'short_cumulative_rate', 'long_cumulative_rate', 'short_historical_rates', 'long_historical_rates']]
 
 
@@ -184,9 +198,8 @@ def create_spot_perp_opportunites_df(perpetual_exchange, perpetual_rates_df, spo
     # Rename pair column to spot_pair in spot data dataframe
     spot_pairs_df.rename(columns={'pair': 'spot_pair'}, inplace=True)
 
-    # Create spot_pair column out of perpetual pair by splitting the string with ':' and removing leading numbers
+    # Create spot_pair column out of perpetual pair by splitting the string with ':'
     perpetual_rates_df['spot_pair'] = perpetual_rates_df['pair'].str.split(':').str.get(0)
-    perpetual_rates_df['spot_pair'] = perpetual_rates_df['spot_pair'].apply(remove_leading_numbers)
 
     # Filter data below the threshold
     perpetual_rates_df = perpetual_rates_df[perpetual_rates_df['rate'].abs() > CONFIG['funding_rate_threshold']]
@@ -201,9 +214,12 @@ def create_spot_perp_opportunites_df(perpetual_exchange, perpetual_rates_df, spo
     spot_perp_df['historical_rates'] = spot_perp_df['historical_rates'].fillna('[]').apply(ast.literal_eval)
     spot_perp_df['APY_historical_average'] = 365 * spot_perp_df['historical_rates'].apply(sum) / CONFIG['funding_historical_days']
 
+    # Round APY
+    spot_perp_df['APY_historical_average'] = spot_perp_df['APY_historical_average'].round(decimals=2)
+
     return spot_perp_df[
         ['pair', 'rate', 'APY_historical_average', 'perp_exchange', 'spot_exchange',
-         'mean_daily_amplitude', 'max_daily_amplitude', 'historical_rates']]
+         'mean_daily_amplitude', 'max_daily_amplitude', 'amplitude_days', 'historical_rates']]
 
 
 def filter_and_sort_rates(df, negative=False):

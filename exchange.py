@@ -26,7 +26,11 @@ def get_all_trading_pairs(exchange, perpetual=False):
     Returns:
         list: List of trading pairs.
     """
-    markets = exchange.fetch_markets()
+    try:
+        markets = exchange.fetch_markets()
+    except Exception as e:
+        print(f"Error fetching pairs for {exchange.name}: {e}")
+        return []
     if not perpetual:
         trading_pairs = [market['symbol'] for market in markets if 'spot' in market['type'] and market['active']]
     else:

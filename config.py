@@ -1,10 +1,10 @@
 CONFIG = {
-    'perpetual_exchanges': ['binance', 'gate', 'kucoinfutures', 'bybit', 'okx'],
+    'perpetual_exchanges': ['binance', 'gate', 'htx', 'kucoinfutures', 'bybit', 'okx'],
     # List of perpetual exchanges from which to obtain or analyze funding rates.
     # Specify exchange IDs according to the CCXT library format.
     # For a list of supported exchange IDs, refer to: https://docs.ccxt.com/#/?id=exchanges
 
-    'spot_exchanges': ['binance', 'gate', 'kucoin', 'bybit', 'okx'],
+    'spot_exchanges': ['binance', 'gate', 'htx', 'kucoin', 'bybit', 'okx'],
     # List of spot exchanges for analyzing opportunities between Spot and Perpetual.
     # Specify exchange IDs according to the CCXT library format.
     # For a list of supported exchange IDs, refer to: https://docs.ccxt.com/#/?id=exchanges
@@ -20,7 +20,7 @@ CONFIG = {
     'directory': 'funding_data',
     # Directory where the current funding rates should be saved
 
-    'subdirectory': '20240509_01',
+    'subdirectory': '20240514_01',
     # Subdirectory within the main directory to save the current funding rates data.
 
     'file_format': 'xlsx',

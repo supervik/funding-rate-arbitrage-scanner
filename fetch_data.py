@@ -25,6 +25,8 @@ def fetch_and_save_data():
 
         # Get all perpetual trading pairs
         perp_trading_pairs = get_all_trading_pairs(exchange, perpetual=True)
+        if not perp_trading_pairs:
+            continue
         print(f" {len(perp_trading_pairs)} perpetual trading pairs found")
 
         # Get all funding rates
